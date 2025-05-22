@@ -1,0 +1,28 @@
+{%- set result_array = [] -%}
+{%- set providers_count = [] -%}
+{%- set providers_count_temp = [] -%}
+{%- set game = {} -%}
+{%- set report = reports['6825ef9cb1ad7e9fe0be4180'].rows | sort(attribute=1, reverse=True) -%}
+
+{%- for item in report -%}
+	{%- set game = catalogs.casino_games_feed_new.item_by_id(item[0]) -%}
+		{%- if game -%}
+		{%- append game.provider to providers_count -%}
+		{%- set providers_count_temp = [] -%}
+		{%- for provider in providers_count -%}
+			{%- if provider == game.provider -%}
+			{%- append provider to providers_count_temp -%}
+			{%- endif -%}
+		{%- endfor -%}
+		{%- set result_item = {
+			"item_id": item[0],
+		    "properties": {
+			"popularity": loop.index,
+			"provider_popularity": providers_count_temp | length
+		  }
+		} -%}
+		{%- append result_item to result_array -%}
+	{%- endif -%}
+{%- endfor -%}
+
+{{- result_array | json -}}
